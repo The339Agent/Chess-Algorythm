@@ -10,7 +10,7 @@
 var chessboard,
   game = new Chess();
 var botIsWhite = false;
-var botIsBoth = true;
+var botIsBoth = false;
 
 /* Algorythms */
 
@@ -439,7 +439,7 @@ var onDragStart = function(source, piece, position, orientation) {
   if (
     game.game_over() || // The game is over
     (piece.search(/^b/) !== -1) == !botIsWhite || // The piece is not the user color
-    !botIsBoth
+    botIsBoth
   ) {
     logGameEnd();
     return false;
