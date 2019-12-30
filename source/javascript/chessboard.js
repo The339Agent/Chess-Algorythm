@@ -22,10 +22,12 @@ var randomMove = function(isWhite) {
 
 // Minimax move algorythm
 
+let depth = 3;
+
 // Not optimized Minimax
 var minimaxMove = function(isWhite) {
   console.log("Starting Minimax move search.");
-  let move = minimax(game, 3, isWhite, true);
+  let move = minimax(game, depth, isWhite, true);
   console.log(
     "Move search done. Optimal move: " +
       move.move +
@@ -132,7 +134,7 @@ var minimax = function(board, depth, isWhite, topLevel = false) {
 // Alpha-Beta prunning (Optimized minimax algorythm)
 var alphaBetaPrunningMove = function(isWhite) {
   console.log("Starting alpha-beta prunning search.");
-  let move = alphaBetaPrunning(game, 3, -Infinity, Infinity, isWhite, true);
+  let move = alphaBetaPrunning(game, depth, -Infinity, Infinity, isWhite, true);
   console.log(
     "Alpha-beta prunning search done. Optimal move: " +
       move.move +
