@@ -21,6 +21,8 @@ var randomMove = function(isWhite) {
 };
 
 // Minimax move algorythm
+
+// Not optimized Minimax
 var minimaxMove = function(isWhite) {
   console.log("Starting Minimax move search.");
   let move = minimax(game, 3, isWhite, true);
@@ -114,6 +116,156 @@ var minimax = function(board, depth, isWhite, topLevel = false) {
         bestMove = move;
       }
 
+      if (topLevel) {
+        console.log(
+          "Search progress: " +
+            Math.floor(((i + 1) / board.moves().length) * 100) +
+            "%"
+        );
+      }
+    }
+
+    return { value: value, move: bestMove };
+  }
+};
+
+// Alpha-Beta prunning (Optimized minimax algorythm)
+var alphaBetaPrunningMove = function(isWhite) {
+  console.log("Starting alpha-beta prunning search.");
+  let move = alphaBetaPrunning(game, 3, -Infinity, Infinity, isWhite, true);
+  console.log(
+    "Alpha-beta prunning search done. Optimal move: " +
+      move.move +
+      ". Expected result: " +
+      move.value
+  );
+  return move.move;
+};
+
+var alphaBetaPrunning = function(
+  board,
+  depth,
+  alpha,
+  beta,
+  isWhite,
+  topLevel = false
+) {
+  if (depth === 0) return { value: getBoardValue(board), move: null };
+
+  if (isWhite) {
+    // If the bot is white, it wants to get the move with the highest value
+    let value = -Infinity;
+    let bestMove = null;
+
+    for (let i = 0; i < board.moves().length; i++) {
+      // Get move
+      let move = board.moves()[i];
+
+      // Create a copy of the board
+      let cloneBoard = Chess();
+      cloneBoard.load(board.fen());
+      cloneBoard.move(move);
+
+      // Get value of tile
+      let moveAlphaBeta = alphaBetaPrunning(
+        cloneBoard,
+        depth - 1,
+        alpha,
+        beta,
+        !isWhite
+      );
+      // Check if move is better than currently best move
+      if (value < moveAlphaBeta.value) {
+        // Set move as best move
+        if (move !== null && topLevel) {
+          console.log(
+            "New best move for maximal score. Move: " +
+              moveAlphaBeta.move +
+              ". Expected result: (" +
+              value +
+              ") " +
+              moveAlphaBeta.value
+          );
+        }
+        value = moveAlphaBeta.value;
+        bestMove = move;
+      }
+
+      // Update alpha
+      alpha = Math.max(alpha, value);
+
+      // Check for beta prunning
+      if (alpha > beta) {
+        // Perform beta prunning
+        if (topLevel) {
+          console.log("Performing beta prunning.");
+        }
+        break;
+      }
+
+      // Print progress
+      if (topLevel) {
+        console.log(
+          "Search progress: " +
+            Math.floor(((i + 1) / board.moves().length) * 100) +
+            "%"
+        );
+      }
+    }
+
+    return { value: value, move: bestMove };
+  } else {
+    // If the bot is black, it wants to get the move with the lowest value
+    let value = Infinity;
+    let bestMove = null;
+
+    for (let i = 0; i < board.moves().length; i++) {
+      // Get move
+      let move = board.moves()[i];
+
+      // Create a copy of the board
+      let cloneBoard = Chess();
+      cloneBoard.load(board.fen());
+      cloneBoard.move(move);
+
+      // Get value of tile
+      let moveAlphaBeta = alphaBetaPrunning(
+        cloneBoard,
+        depth - 1,
+        alpha,
+        beta,
+        !isWhite
+      );
+      // Check if move is better than currently best move
+      if (value > moveAlphaBeta.value) {
+        // Set move as best move
+        if (move !== null && topLevel) {
+          console.log(
+            "New best move for minimal score. Move: " +
+              moveAlphaBeta.move +
+              ". Expected result: (" +
+              value +
+              ") " +
+              moveAlphaBeta.value
+          );
+        }
+        value = moveAlphaBeta.value;
+        bestMove = move;
+      }
+
+      // Update beta
+      beta = Math.min(beta, value);
+
+      // Check for alpha prunning
+      if (alpha > beta) {
+        // Perform alpha prunning
+        if (topLevel) {
+          console.log("Performing alpha prunning.");
+        }
+        break;
+      }
+
+      // Print progress
       if (topLevel) {
         console.log(
           "Search progress: " +
@@ -223,13 +375,18 @@ var getValueOfPiece = function(piece, piecePos) {
 /* Move generation code */
 
 // Set the algorythm to use to select the best move
-var moveSelectorAlgorythm = minimaxMove;
+var moveSelectorAlgorythm = alphaBetaPrunningMove;
 
 var makeChessMove = function() {
   // Check if the bot is in checkmate
   if (!game.game_over()) {
     // Make a random move
+    let startTime = Date.now();
     game.move(moveSelectorAlgorythm(botIsWhite));
+    let timeElapsed = Math.fround((Date.now() - startTime) / 1000).toFixed(3);
+    console.log(
+      "Move algorytm has found a move in " + timeElapsed + "seconds."
+    );
 
     // Update the Chessboard.js board
     chessboard.position(game.fen(), true);
