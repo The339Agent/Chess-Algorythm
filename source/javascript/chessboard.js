@@ -10,6 +10,7 @@
 var chessboard,
   game = new Chess();
 var botIsWhite = false;
+var botIsBoth = true;
 
 /* Algorythms */
 
@@ -21,8 +22,6 @@ var randomMove = function(isWhite) {
 };
 
 // Minimax move algorythm
-
-let depth = 3;
 
 // Not optimized Minimax
 var minimaxMove = function(isWhite) {
@@ -133,7 +132,19 @@ var minimax = function(board, depth, isWhite, topLevel = false) {
 
 // Alpha-Beta prunning (Optimized minimax algorythm)
 var alphaBetaPrunningMove = function(isWhite) {
-  console.log("Starting alpha-beta prunning search.");
+  // Automaticly add as many depth levels as possible
+  depth = 2;
+  if (game.moves().length < 30) depth = 3;
+  if (game.moves().length < 3) depth = 4;
+
+  console.log(
+    "Starting alpha-beta prunning search with depth of " +
+      depth +
+      ". " +
+      game.moves().length +
+      " possible initial moves."
+  );
+
   let move = alphaBetaPrunning(game, depth, -Infinity, Infinity, isWhite, true);
   console.log(
     "Alpha-beta prunning search done. Optimal move: " +
@@ -393,8 +404,11 @@ var makeChessMove = function() {
     // Update the Chessboard.js board
     chessboard.position(game.fen(), true);
 
-    botIsWhite = !botIsWhite;
-    window.setTimeout(makeChessMove, 250);
+    // Queue a new bot move
+    if (botIsBoth) {
+      botIsWhite = !botIsWhite;
+      window.setTimeout(makeChessMove, 250);
+    }
   } else {
     logGameEnd();
   }
@@ -409,7 +423,7 @@ var logGameEnd = function(whiteTurn) {
     } else if (game.insufficient_material()) {
       alert("Game over! Not enough pices for game end.");
     } else {
-      alert("Game over! " + (whiteTurn ? "White" : "Black") + " wins!");
+      alert("Game over! " + (!whiteTurn ? "White" : "Black") + " wins!");
     }
   }
 };
@@ -420,8 +434,10 @@ var onDragStart = function(source, piece, position, orientation) {
   // Allow user to move pice if the following conditions are not true
   if (
     game.game_over() || // The game is over
-    (piece.search(/^b/) !== -1) == !botIsWhite // The piece is not the user color
+    (piece.search(/^b/) !== -1) == !botIsWhite || // The piece is not the user color
+    !botIsBoth
   ) {
+    logGameEnd();
     return false;
   }
 };
@@ -440,9 +456,7 @@ var onDrop = function(source, target) {
   }
 
   // Wait a quarter of a second before making a AI move
-  window.setTimeout(() => {
-    makeChessMove(false);
-  }, 250);
+  window.setTimeout(makeChessMove, 250);
 };
 
 var onMouseoutSquare = function() {};
@@ -455,7 +469,6 @@ var cfg = {
   draggable: true,
   position: "start",
   pieceTheme: "libraries/chessboard.js/img/chesspieces/wikipedia/{piece}.png",
-  orientation: botIsWhite ? "black" : "white",
   onDragStart: onDragStart,
   onDrop: onDrop,
   onMouseoutSquare: onMouseoutSquare,
@@ -463,3 +476,8 @@ var cfg = {
   onSnapEnd: onSnapEnd
 };
 chessboard = ChessBoard("chessboard", cfg);
+
+if (botIsBoth) botIsWhite = true;
+if (botIsWhite || botIsBoth) {
+  makeChessMove();
+}
