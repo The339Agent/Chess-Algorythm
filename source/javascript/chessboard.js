@@ -174,19 +174,21 @@ var alphaBetaPrunning = function(
       // Get move
       let move = board.moves()[i];
 
-      // Create a copy of the board
-      let cloneBoard = Chess();
-      cloneBoard.load(board.fen());
-      cloneBoard.move(move);
+      // Do the move
+      board.move(move);
 
       // Get value of tile
       let moveAlphaBeta = alphaBetaPrunning(
-        cloneBoard,
+        board,
         depth - 1,
         alpha,
         beta,
         !isWhite
       );
+
+      // Undo the move
+      board.undo();
+
       // Check if move is better than currently best move
       if (value < moveAlphaBeta.value) {
         // Set move as best move
@@ -236,19 +238,21 @@ var alphaBetaPrunning = function(
       // Get move
       let move = board.moves()[i];
 
-      // Create a copy of the board
-      let cloneBoard = Chess();
-      cloneBoard.load(board.fen());
-      cloneBoard.move(move);
+      // Do the move
+      board.move(move);
 
       // Get value of tile
       let moveAlphaBeta = alphaBetaPrunning(
-        cloneBoard,
+        board,
         depth - 1,
         alpha,
         beta,
         !isWhite
       );
+
+      // Undo the move
+      board.undo();
+
       // Check if move is better than currently best move
       if (value > moveAlphaBeta.value) {
         // Set move as best move
