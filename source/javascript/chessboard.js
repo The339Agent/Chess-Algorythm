@@ -463,21 +463,12 @@ var onDrop = function(source, target) {
   window.setTimeout(makeChessMove, 250);
 };
 
-var onMouseoutSquare = function() {};
-
-var onMouseoverSquare = function() {};
-
-var onSnapEnd = function() {};
-
 var cfg = {
   draggable: true,
   position: "start",
   pieceTheme: "libraries/chessboard.js/img/chesspieces/wikipedia/{piece}.png",
   onDragStart: onDragStart,
-  onDrop: onDrop,
-  onMouseoutSquare: onMouseoutSquare,
-  onMouseoverSquare: onMouseoverSquare,
-  onSnapEnd: onSnapEnd
+  onDrop: onDrop
 };
 chessboard = ChessBoard("chessboard", cfg);
 
